@@ -5,6 +5,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -19,9 +21,13 @@ public final class DBClient {
 
     private static final Logger log = LoggerFactory.getLogger(DBClient.class);
 
+    private static HikariConfig config = new HikariConfig();
+    private static HikariDataSource ds;
+
     static {
+
         Statement stmt = null;
-        Connection conn= null;
+        Connection conn = null;
         try {
             conn = getConnection();
             stmt = conn.createStatement();
@@ -37,29 +43,23 @@ public final class DBClient {
         }
     }
 
-    // squid:S1118: Utility classes should not have public constructors
     private DBClient() {
-        throw new IllegalAccessError("This class should not be instantiated.");
     }
-    
-    /**
-     * Returns a database connection to connect a database.
-     * 
-     * @return A database connection
-     */
+
     public static Connection getConnection() throws SQLException {
-        final String dbDriver = ApplicationUtils.getDatabaseDriver();
-        final String dbUrl = ApplicationUtils.getDatabaseURL();
-        if (!StringUtils.isBlank(dbDriver)) {
-            try {
-                Class.forName(dbDriver);
-            } catch (ClassNotFoundException e) {
-                log.error("ClassNotFoundException occurs: ", e);
-            }
-        }
-        return DriverManager.getConnection(dbUrl);
+
+        config.setJdbcUrl("jdbc:hsqldb:hypersonic/easybuggy;hsqldb.lock_file=false");
+        config.setUsername("sa");
+        config.setPassword("");
+        config.setDriverClassName("org.hsqldb.jdbc.JDBCDriver");
+        config.addDataSourceProperty("cachePrepStmts", "true");
+        config.addDataSourceProperty("prepStmtCacheSize", "250");
+        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        ds = new HikariDataSource(config);
+
+        return ds.getConnection();
     }
-    
+
     private static void createUsersTable(Statement stmt) throws SQLException {
         try {
             stmt.executeUpdate("drop table users");
@@ -76,7 +76,7 @@ public final class DBClient {
         stmt.executeUpdate("insert into users values ('admin02','admin02','pas2w0rd','" + RandomStringUtils.randomNumeric(10) + "','false', '', '')");
         stmt.executeUpdate("insert into users values ('admin03','admin03','pa33word','" + RandomStringUtils.randomNumeric(10) + "','false', '', '')");
         stmt.executeUpdate("insert into users values ('admin04','admin04','pathwood','" + RandomStringUtils.randomNumeric(10) + "','false', '', '')");
-        
+
         // insert public (test) user records
         stmt.executeUpdate("insert into users values ('user00','Mark','password','" + RandomStringUtils.randomNumeric(10) + "','true', '', '')");
         stmt.executeUpdate("insert into users values ('user01','David','pa32w0rd','" + RandomStringUtils.randomNumeric(10) + "','true', '', '')");
