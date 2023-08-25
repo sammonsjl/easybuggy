@@ -26,6 +26,17 @@ public final class DBClient {
 
     static {
 
+        config.setJdbcUrl("jdbc:hsqldb:hypersonic/easybuggy;hsqldb.lock_file=false");
+        config.setUsername("sa");
+        config.setPassword("");
+        config.setDriverClassName("org.hsqldb.jdbc.JDBCDriver");
+        config.addDataSourceProperty("cachePrepStmts", "true");
+        config.addDataSourceProperty("prepStmtCacheSize", "250");
+        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        config.setRegisterMbeans(true);
+        config.setPoolName("HikariPool-1");
+        ds = new HikariDataSource(config);
+
         Statement stmt = null;
         Connection conn = null;
         try {
@@ -47,15 +58,6 @@ public final class DBClient {
     }
 
     public static Connection getConnection() throws SQLException {
-
-        config.setJdbcUrl("jdbc:hsqldb:hypersonic/easybuggy;hsqldb.lock_file=false");
-        config.setUsername("sa");
-        config.setPassword("");
-        config.setDriverClassName("org.hsqldb.jdbc.JDBCDriver");
-        config.addDataSourceProperty("cachePrepStmts", "true");
-        config.addDataSourceProperty("prepStmtCacheSize", "250");
-        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-        ds = new HikariDataSource(config);
 
         return ds.getConnection();
     }

@@ -29,15 +29,9 @@ public class DBConnectionLeakServlet extends AbstractServlet {
             final String dbUrl = ApplicationUtils.getDatabaseURL();
             final String dbDriver = ApplicationUtils.getDatabaseDriver();
 
-            if (!StringUtils.isBlank(dbDriver)) {
-                loadDbDriver(dbDriver);
-            }
             bodyHtml.append(selectUsers(locale));
-            if (StringUtils.isBlank(dbUrl) || dbUrl.startsWith("jdbc:derby:memory:")) {
-                bodyHtml.append(getInfoMsg("msg.note.not.use.ext.db", locale));
-            } else {
-                bodyHtml.append(getInfoMsg("msg.note.db.connection.leak.occur", locale));
-            }
+
+            bodyHtml.append(getInfoMsg("msg.note.db.connection.leak.occur", locale));
 
         } catch (Exception e) {
             log.error("Exception occurs: ", e);
